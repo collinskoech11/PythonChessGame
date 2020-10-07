@@ -118,3 +118,74 @@ class game:
     a checkExists function which checks if either players are in check (woah, I just got that nonsequitur)
     a main loop, which takes input, runs it through the parser, asks the piece if the move is valid, and moves the piece if it is. if the move conflicts with another piece, that piece is removed. ischeck(mate) is run, and if there is a checkmate, the game prints a message as to who wins
     """
+
+    class Piece:
+
+        def __init__(self,color,name):
+            self.name = name
+            self.position = None
+            self.Color = color
+        def isValid(self,startpos,endpos,Color,gameboard):
+            if endpos in self.availableMoves(startpos[0],startpos[1],gameboard, Color = Color):
+                return True
+            return False
+        def __repr__(self):
+            return self.name
+
+        def __str__(self):
+            return self.name
+
+        def availableMoves(self,x,y,gameboard):
+            print("Error: no movement for BaseClass")
+
+        def AdNauseum(self,x,y,gameboard,Color, intervals):
+            """repeats the given interval until another piece is run into. 
+            if that piece is not of the same color, that square is added and
+            then the list is returned"""
+            answer = []
+            for xint,yint in intervals:
+                xtemp,ytemp = x + xint, y+yint
+                while self.isInBounds(xtemp,ytemp):
+
+                    target = gameboard.get((xtemp,ytemp),None)
+                    if target is None:  answers.append((xtemp,ytemp))
+                    elif target.Color != Color:
+                        answers.append((xtemp,ytemp))
+                        break
+                    else:
+                        break
+
+                    xtemp,ytemp = xtemp + xint,ytemp + yint
+                return answers
+
+        def isInBounds(self,x,y):
+            "checks if a position is on the board"
+            if x >= 0 and x < 8 and y >= 0 and y < 8:
+                return True
+            return False
+    
+        def noConflict(self,gameboard,initialColor,x,y):
+            "checks if a single position poses no conflict to the rules of chess"
+            if self.isInBounds(x,y) and (((x,y) not in gameboard) or gameboard[(x,y)].Color != initialColor) : return True
+            return False
+
+
+chessCardinals = [(1,0),(0,1),(-1,0),(0,-1)]
+chessDiagonals = [(1,1),(-1,1),(1,-1),(-1,-1)]
+
+def knightList(x,y,int1,int2):
+    """sepcifically for the rook, permutes the values needed around a position for noConflict tests"""
+    return [(x+int1,y+int2),(x-int1,y+int2),(x+int1,y-int2),(x-int1,y-int2),(x+int2,y+int1),(x-int2,y+int1),(x+int2,y-int1),(x-int2,y-int1)]
+def kingList(x,y):
+    return [(x+1,y),(x+1,y+1),(x+1,y-1),(x,y+1),(x,y-1),(x-1,y),(x-1,y+1),(x-1,y-1)]
+
+class Knight(Piece):
+    def availableMoves(self,x,y,gameboard, Color = None):
+        if Color is None : Color = self.Color
+        return [(xx,yy) for xx,yy in knightList(x,y,2,1) if self.noConflict(gameboard, Color, xx, yy)]
+
+class Rook(Piece):
+    def availableMoves(self,x,y,gameboard ,Color = None):
+        if Color is None : Color = self.Color
+        return self.AdNauseum(x, y,gameboard, Color, chessCardinals)
+
